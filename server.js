@@ -44,7 +44,7 @@ app.post('/fruits', async (req, res) => {
     // console.log(req.body); // print the encoded object as javascript object
     res.redirect('/fruits'); //redirect triggers a get request (we add routes as an argument) to the index page if it exists
 })
-
+,
 app.get('/fruits/new', (req, res) => {
     res.render('fruits/new.ejs');
 });
@@ -55,10 +55,31 @@ app.get("/fruits/:fruitId", async (req, res) => {
     res.render('fruits/show.ejs', { fruit });
 });
 
+app.get("/fruits/:fruitId/edit", async (req, res) => {
+    const fruitId = req.params.fruitId;
+    const fruit = await Fruit.findById(fruitId);
+    res.render('fruits/edit.ejs', { fruit });
+});
+
 app.delete('/fruits/:fruitId', async (req, res) => {
     const fruitId = req.params.fruitId;
     const fruit = await Fruit.findByIdAndDelete(fruitId); // findByIdAndDelete() gets the object, then deletes it, you can access the deleted object by storing it 
     res.redirect(`/fruits?msg='${fruit.name} record deleted'`); // send a message containing the details of the deleted object
+});
+
+app.put("/fruits/:fruitId", async (req, res) => {
+  // Handle the 'isReadyToEat' checkbox data
+  if (req.body.isReadyToEat === "on") {
+    req.body.isReadyToEat = true;
+  } else {
+    req.body.isReadyToEat = false;
+  }
+  
+  // Update the fruit in the database
+  await Fruit.findByIdAndUpdate(req.params.fruitId, req.body);
+
+  // Redirect to the fruit's show page to see the updates
+  res.redirect(`/fruits/${req.params.fruitId}`);
 });
 
 app.listen(PORT, () => {
