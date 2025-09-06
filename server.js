@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const express = require('express');
 const morgan = require('morgan');
+const path = require("path");
 const mongoose =  require('mongoose');
 const methodOverride = require('method-override');
 
@@ -17,8 +18,9 @@ const Fruit = require('./models/fruit');// you don't have to write the file's ex
 
 // MIDDLEWARE
 app.use(methodOverride('_method')); // we override the method before logging it using morgan
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false}));// a middleware that converts model into a javascript object
+app.use(express.static(path.join(__dirname, "public"))); //added this to be able to add the css
 
 // ROUTES
 app.get('/', (req, res) => {
