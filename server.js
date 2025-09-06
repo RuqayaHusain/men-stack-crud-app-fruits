@@ -3,6 +3,7 @@ dotenv.config();
 const express = require('express');
 const morgan = require('morgan');
 const mongoose =  require('mongoose');
+const methodOverride = require('method-override');
 
 const app = express();
 const PORT = 3000;
@@ -15,6 +16,7 @@ mongoose.connection.on('connected', () => {
 const Fruit = require('./models/fruit');// you don't have to write the file's extension (.js), when using the require function
 
 // MIDDLEWARE
+app.use(methodOverride('_method')); // we override the method before logging it using morgan
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false}));// a middleware that converts model into a javascript object
 
@@ -24,6 +26,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/fruits', async (req, res) => {
+    const msg = req.query.msg; // get the message passed by the delete route
+    console.log(msg);
     const fruits = await Fruit.find({}); // or .find() which will print all of the fruits
     res.render('fruits/index.ejs', {
         fruits: fruits,
@@ -49,6 +53,12 @@ app.get("/fruits/:fruitId", async (req, res) => {
     const fruitId = req.params.fruitId;
     const fruit = await Fruit.findById(fruitId);
     res.render('fruits/show.ejs', { fruit });
+});
+
+app.delete('/fruits/:fruitId', async (req, res) => {
+    const fruitId = req.params.fruitId;
+    const fruit = await Fruit.findByIdAndDelete(fruitId); // findByIdAndDelete() gets the object, then deletes it, you can access the deleted object by storing it 
+    res.redirect(`/fruits?msg='${fruit.name} record deleted'`); // send a message containing the details of the deleted object
 });
 
 app.listen(PORT, () => {
